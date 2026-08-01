@@ -1,0 +1,18 @@
+# Виртуальное окружение
+.venv/
+venv/
+ENV/
+
+# Кэш Python
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Настройки PyCharm
+.idea/
+
+# Локальная база данных (куратор развернет её сам через миграции и фикстуры)
+db.sqlite3
+
+media/
+diploma-frontend/
