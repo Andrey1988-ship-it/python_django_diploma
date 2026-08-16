@@ -6,7 +6,6 @@ click==8.4.2
 click-didyoumean==0.3.1
 click-plugins==1.1.1.2
 click-repl==0.3.0
-diploma-frontend @ file:///home/andrey/PycharmProjects/PythonProject_fin/diploma-frontend/dist/diploma-frontend-0.6.tar.gz#sha256=3a6b1203724b256946919b4d65b362b005ae6a9e1e93d8d765e96aa6a92764ac
 Django==4.2
 django-environ==0.14.0
 django-stubs==6.0.7
@@ -28,3 +27,4 @@ tzdata==2026.3
 tzlocal==5.4.4
 vine==5.1.0
 wcwidth==0.8.2
+
