@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from .serializers import CategorySerializer, ProductSerializer, TagSerializer, ReviewSerializer, BannerSerializer # <-- Добавить BannerSerializer
-
+from .serializers import BannerProductSerializer
 # Импортируем модели и сериализаторы из текущего приложения products
 from .models import Category, Product
 from .serializers import CategorySerializer, ProductSerializer
@@ -73,12 +73,11 @@ class LimitedProductsView(APIView):
 
 class BannersView(APIView):
     """Промо-баннеры для главной страницы"""
-
     def get(self, request):
-        # Берем первые 3 товара
+        # Берем 3 активных товара
         products = Product.objects.filter(is_deleted=False).order_by('id')[:3]
-        # Используем специальный BannerSerializer, который отдаст поле 'href'
-        return Response(BannerSerializer(products, many=True, context={'request': request}).data)
+        serializer = BannerProductSerializer(products, many=True, context={'request': request})
+        return Response(serializer.data)
 
 
 

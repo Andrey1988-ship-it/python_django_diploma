@@ -67,7 +67,7 @@ class Product(SoftDeleteModel):
 
 class Review(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews', verbose_name="Товар")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор")
+    author = models.ForeignKey('auth.User', on_delete=models.CASCADE, verbose_name="Автор")
     text = models.TextField(verbose_name="Текст отзыва")
     rate = models.PositiveSmallIntegerField(verbose_name="Оценка (1-5)")
     date_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")

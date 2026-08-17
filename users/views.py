@@ -1,23 +1,17 @@
-from django.shortcuts import render
-
-import json
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import login, logout
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 
-# Импортируем профиль из текущего приложения, а сериализатор подготовим позже
 from .models import Profile
-from .serializers import ProfileSerializer  # Если он будет в users/serializers.py
+from .serializers import ProfileSerializer
 
 
 class SignInView(APIView):
-    """Эндпоинт входа на сайт по ТЗ с автопилотом сессии"""
-
     def post(self, request):
         username = request.query_params.get('username') or request.data.get('username')
         if username:
@@ -35,8 +29,6 @@ class SignInView(APIView):
 
 
 class SignUpView(APIView):
-    """Регистрация нового пользователя по спецификации Swagger"""
-
     def post(self, request):
         name = request.query_params.get('name')
         username = request.query_params.get('username')
@@ -50,20 +42,11 @@ class SignUpView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-# Дописать в самый конец файла users/views.py:
-
 class SignOutView(APIView):
-    """Выход пользователя из системы"""
-
     def post(self, request):
         logout(request)
         return Response(status=status.HTTP_200_OK)
 
-
-# Дописать в самый верх файла users/views.py к остальным импортам:
-from rest_framework.parsers import MultiPartParser, FormParser
-
-# Дописать в самый конец файла users/views.py:
 
 class ProfileView(APIView):
     """Редактирование текстовой информации личного кабинета"""
@@ -87,8 +70,9 @@ class ProfileView(APIView):
         return Response(ProfileSerializer(profile, context={'request': request}).data)
 
 
+
+
 class ProfileAvatarView(APIView):
-    """Специальный загрузчик файлов аватарок с валидацией размера до 2 Мб"""
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
@@ -104,4 +88,3 @@ class ProfileAvatarView(APIView):
             except ValidationError as e:
                 return Response({"errors": e.message_dict}, status=status.HTTP_400_BAD_REQUEST)
         return Response(ProfileSerializer(profile, context={'request': request}).data)
-

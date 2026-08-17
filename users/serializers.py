@@ -1,9 +1,9 @@
 from rest_framework import serializers
-# Импортируем модель профиля из текущего приложения users
+from django.contrib.auth.models import User
 from .models import Profile
 
-
 class ProfileSerializer(serializers.ModelSerializer):
+    # Явно связываем поля с моделью User, так как фронтенд ждет fullName и email в одном объекте
     fullName = serializers.CharField(source='user.first_name', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
     avatar = serializers.SerializerMethodField()
@@ -18,8 +18,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             url = request.build_absolute_uri(obj.avatar.url) if request else obj.avatar.url
             return {
                 "src": url,
-                "alt": "avatar",
-                "width": "150",
-                "height": "150"
+                "alt": "avatar"
             }
         return {"src": "https://placeholder.com", "alt": "default avatar"}

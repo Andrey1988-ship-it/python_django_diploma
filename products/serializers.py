@@ -9,6 +9,9 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
+from rest_framework import serializers
+from .models import Category, Tag, Product, Review
+
 class SubCategorySerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
 
@@ -18,12 +21,13 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         if obj.image_src:
-            return {"src": obj.image_src.url, "alt": obj.image_alt}
+            return {"src": obj.image_src.url, "alt": obj.image_alt or obj.title}
         return None
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    subcategories = SubCategorySerializer(many=True, read_only=True)
+    # Явно объявляем subcategories с выводом пустых массивов, если подкатегорий нет
+    subcategories = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
 
     class Meta:
@@ -32,8 +36,17 @@ class CategorySerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         if obj.image_src:
-            return {"src": obj.image_src.url, "alt": obj.image_alt}
+            return {"src": obj.image_src.url, "alt": obj.image_alt or obj.title}
         return None
+
+    def get_subcategories(self, obj):
+        # Находим дочерние категории
+        subs = obj.subcategories.all()
+        if subs.exists():
+            return SubCategorySerializer(subs, many=True, context=self.context).data
+        # ЖЕСТКИЙ ФИКС БАГА [object Object]: возвращаем пустой список, а не null!
+        return []
+
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -44,6 +57,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
+        # УБЕДИТЕСЬ, ЧТО ПОЛЕ 'id' ЗДЕСЬ ЕСТЬ И СТОИТ ПЕРВЫМ:
         fields = [
             'id', 'category', 'price', 'count', 'name',
             'description', 'free_delivery', 'images', 'tags',
@@ -57,6 +71,7 @@ class ProductSerializer(serializers.ModelSerializer):
             return [{"src": request.build_absolute_uri(img.image.url) if request else img.image.url,
                      "alt": img.alt or obj.name} for img in images]
         return [{"src": "https://placeholder.com", "alt": obj.name}]
+
 
 
 # Дописано в самый конец файла:
@@ -100,4 +115,27 @@ class BannerSerializer(serializers.ModelSerializer):
     def get_href(self, obj):
         # Фронтенд SPA ожидает именно такой относительный путь для перехода к товару
         return f"/product/{obj.id}"
+
+class BannerProductSerializer(serializers.ModelSerializer):
+    """Специальный сериализатор, который переводит поля товара под макет баннера фронтенда"""
+    title = serializers.CharField(source='name')
+    image = serializers.SerializerMethodField()
+    href = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ['id', 'title', 'image', 'href', 'description', 'price']
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        # Берем первую картинку из галереи товара
+        first_img = obj.images.first()
+        if first_img and first_img.image:
+            url = request.build_absolute_uri(first_img.image.url) if request else first_img.image.url
+            return {"src": url, "alt": first_img.alt or obj.name}
+        return {"src": "https://placeholder.com", "alt": obj.name}
+
+    def get_href(self, obj):
+        return f"/product/{obj.id}"
+
 

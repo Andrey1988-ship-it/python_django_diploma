@@ -2,7 +2,7 @@ from django.db import models
 from django.db import models
 from django.contrib.auth.models import User
 # Импортируем товар и абстрактную модель мягкого удаления из приложения products
-from products.models import Product, SoftDeleteModel
+from products.models import  SoftDeleteModel
 
 class Order(SoftDeleteModel):
     STATUS_CHOICES = [
@@ -32,7 +32,8 @@ class Order(SoftDeleteModel):
 class OrderItem(models.Model):
     """Состав заказа: конкретный товар, его количество и цена на момент покупки"""
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name="Заказ")
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, verbose_name="Товар")
+    product = models.ForeignKey('products.Product', on_delete=models.SET_NULL, null=True, verbose_name="Товар")
+
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена при покупке")
     count = models.PositiveIntegerField(default=1, verbose_name="Количество")
 
