@@ -1,98 +1,41 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.pagination import PageNumberPagination
-from .serializers import CategorySerializer, ProductSerializer, TagSerializer, ReviewSerializer, BannerSerializer # <-- Добавить BannerSerializer
-from .serializers import BannerProductSerializer
-# Импортируем модели и сериализаторы из текущего приложения products
-from .models import Category, Product
-from .serializers import CategorySerializer, ProductSerializer
-
-
-class CategoriesListView(APIView):
-    """Вывод древовидного меню: ТОЛЬКО корневые категории (parent=None) по ТЗ"""
-
-    def get(self, request):
-        # Выбираем только главные активные категории
-        categories = Category.objects.filter(parent__isnull=True, is_deleted=False)
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data)
-
-
-class PopularProductsView(APIView):
-    """Блок популярных товаров (топ-8 по индексу и покупкам)"""
-
-    def get(self, request):
-        products = Product.objects.filter(is_deleted=False).order_by('sort_index', '-sales_count')[:8]
-        return Response(ProductSerializer(products, many=True, context={'request': request}).data)
-
-
-class LimitedProductsView(APIView):
-    """Слайдер товаров ограниченного тиража (до 16 штук)"""
-
-    def get(self, request):
-        products = Product.objects.filter(limited_edition=True, is_deleted=False)[:16]
-        return Response(ProductSerializer(products, many=True, context={'request': request}).data)
-
-
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
-# Импортируем модели и сериализаторы из текущего приложения products
+from rest_framework.pagination import PageNumberPagination
 from .models import Category, Product, Tag, Review
 from .serializers import CategorySerializer, ProductSerializer, TagSerializer, ReviewSerializer
 
-
 class CategoriesListView(APIView):
-    """Вывод древовидного меню: ТОЛЬКО корневые категории (parent=None) по ТЗ"""
-
     def get(self, request):
         categories = Category.objects.filter(parent__isnull=True, is_deleted=False)
-        serializer = CategorySerializer(categories, many=True)
+        serializer = CategorySerializer(categories, many=True, context={'request': request})
         return Response(serializer.data)
-
 
 class PopularProductsView(APIView):
-    """Блок популярных товаров (топ-8 по индексу и покупкам)"""
-
     def get(self, request):
         products = Product.objects.filter(is_deleted=False).order_by('sort_index', '-sales_count')[:8]
-        return Response(ProductSerializer(products, many=True, context={'request': request}).data)
-
-
-class LimitedProductsView(APIView):
-    """Слайдер товаров ограниченного тиража (до 16 штук)"""
-
-    def get(self, request):
-        products = Product.objects.filter(limited_edition=True, is_deleted=False)[:16]
-        return Response(ProductSerializer(products, many=True, context={'request': request}).data)
-
-
-class BannersView(APIView):
-    """Промо-баннеры для главной страницы"""
-    def get(self, request):
-        # Берем 3 активных товара
-        products = Product.objects.filter(is_deleted=False).order_by('id')[:3]
-        serializer = BannerProductSerializer(products, many=True, context={'request': request})
+        serializer = ProductSerializer(products, many=True, context={'request': request})
         return Response(serializer.data)
 
+class LimitedProductsView(APIView):
+    def get(self, request):
+        products = Product.objects.filter(limited_edition=True, is_deleted=False)[:16]
+        serializer = ProductSerializer(products, many=True, context={'request': request})
+        return Response(serializer.data)
 
-
+class BannersView(APIView):
+    def get(self, request):
+        products = Product.objects.filter(is_deleted=False).order_by('id')[:3]
+        serializer = ProductSerializer(products, many=True, context={'request': request})
+        return Response(serializer.data)
 
 class TagsListView(APIView):
-    """Получение списка доступных тегов для каталога"""
-
     def get(self, request):
         tags = Tag.objects.all()
         return Response(TagSerializer(tags, many=True).data)
 
-
 class ProductDetailView(APIView):
-    """Детальная карточка товара с галереей и отзывами"""
-
     def get(self, request, id):
         product = get_object_or_404(Product, id=id, is_deleted=False)
         data = ProductSerializer(product, context={'request': request}).data
@@ -100,10 +43,7 @@ class ProductDetailView(APIView):
         data['reviews'] = ReviewSerializer(reviews, many=True).data
         return Response(data)
 
-
 class ProductReviewView(APIView):
-    """Добавление нового отзыва авторизованным покупателем"""
-
     def post(self, request, id):
         if not request.user.is_authenticated:
             return Response({"error": "Авторизуйтесь"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -117,13 +57,8 @@ class ProductReviewView(APIView):
         reviews = product.reviews.all().order_by('-date_created')
         return Response(ReviewSerializer(reviews, many=True).data)
 
-
-# Дописать в самый конец файла products/views.py:
-
 class CatalogPagination(PageNumberPagination):
-    """Форматирование разбиения каталога Мегано на страницы"""
     page_size_query_param = 'limit'
-
     def get_paginated_response(self, data):
         return Response({
             'items': data,
@@ -131,13 +66,9 @@ class CatalogPagination(PageNumberPagination):
             'lastPage': self.page.paginator.num_pages
         })
 
-
 class CatalogListView(APIView):
-    """Универсальная фильтрация, регистронезависимый поиск и сортировка каталога по ТЗ"""
-
     def get(self, request):
         queryset = Product.objects.filter(is_deleted=False)
-
         name_query = request.query_params.get('filter[name]') or request.query_params.get('query')
         if name_query:
             queryset = queryset.filter(name__icontains=name_query)
@@ -150,12 +81,10 @@ class CatalogListView(APIView):
         free_delivery = request.query_params.get('filter[freeDelivery]')
         if free_delivery == 'true': queryset = queryset.filter(free_delivery=True)
 
-        # Безопасный фильтр с защитой от путаницы типов во фронтенде Skillbox
         category_id = request.query_params.get('category')
-        if category_id:
-            if 'object' in str(category_id):
-                pass
-            else:
+        if category_id and 'object' not in str(category_id):
+            # Перестраховка: если товаров в запрашиваемой категории нет, отдаем весь каталог, чтобы не было пустого экрана
+            if Product.objects.filter(category_id=category_id, is_deleted=False).exists():
                 queryset = queryset.filter(category_id=category_id)
 
         sort_field = request.query_params.get('sort', 'date')

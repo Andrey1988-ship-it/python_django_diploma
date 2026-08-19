@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     CategoriesListView, PopularProductsView, LimitedProductsView,
-    BannersView, TagsListView, ProductDetailView, ProductReviewView, CatalogListView
+    BannersView, TagsListView, ProductDetailView, ProductReviewView,CatalogListView
 )
 
 urlpatterns = [
@@ -13,6 +13,14 @@ urlpatterns = [
     path('catalog', CatalogListView.as_view(), name='catalog'),
 
     # КАРТОЧКА ТОВАРА И ОТЗЫВЫ (ИСПРАВЛЕНО ПО СТАРОЙ API)
+    # КАРТОЧКА ТОВАРА И ОТЗЫВЫ (ПОДДЕРЖКА ОБЕИХ ВЕРСИЙ ССЫЛОК)
     path('product/<int:id>', ProductDetailView.as_view(), name='product-detail'),
-    path('product/<int:id>/review', ProductReviewView.as_view(), name='product-review'),
+    path('product/<int:id>/', ProductDetailView.as_view(), name='product-detail-slash'),
+
+    path('product/<int:id>/reviews', ProductReviewView.as_view(), name='product-reviews'),
+    path('product/<int:id>/reviews/', ProductReviewView.as_view(), name='product-reviews-slash'),
 ]
+
+
+
+

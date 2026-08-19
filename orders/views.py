@@ -25,9 +25,16 @@ class BasketView(APIView):
                 continue
             try:
                 product = Product.objects.get(id=int(product_id), is_deleted=False)
+                # Передаем контекст self.request абсолютно правильно
                 product_json = ProductSerializer(product, context={'request': self.request}).data
+
+                # ЖЕСТКИЙ СИНХРОННЫЙ ФИКС ДЛЯ КЭША ВУЕ:
+                # Отдаем количество товара в корзине в оба возможных поля фронтенда
                 product_json['count'] = count
+                product_json['quantity'] = count
+
                 response_data.append(product_json)
+
             except (Product.DoesNotExist, ValueError):
                 if product_id in basket_data:
                     del basket_data[product_id]
@@ -35,22 +42,29 @@ class BasketView(APIView):
         return response_data
 
     def get(self, request):
-        return Response(self.format_basket_response(self.get_basket(request)))
+        # GET по Swagger возвращает схему ProductShort (массив товаров в корзине)
+        basket_data = self.get_basket(request)
+        return Response(self.format_basket_response(basket_data))
 
     def post(self, request):
         basket = self.get_basket(request)
         product_id = request.data.get('id') or request.query_params.get('id')
         count = request.data.get('count') or request.query_params.get('count') or 1
+
         if product_id and str(product_id).isdigit():
             p_id_str = str(product_id)
             basket[p_id_str] = basket.get(p_id_str, 0) + int(count)
             request.session.modified = True
+
+        # POST по Swagger возвращает схему Basket
+        # Если фронтенд ждет обертку, отдаем массив внутри объекта, иначе — то, что просит схема Basket
         return Response(self.format_basket_response(basket))
 
     def delete(self, request):
         basket = self.get_basket(request)
         product_id = request.data.get('id') or request.query_params.get('id')
         count = request.data.get('count') or request.query_params.get('count') or 1
+
         if product_id and str(product_id) in basket:
             p_id_str = str(product_id)
             if basket[p_id_str] > int(count):
@@ -58,6 +72,7 @@ class BasketView(APIView):
             else:
                 del basket[p_id_str]
             request.session.modified = True
+
         return Response(self.format_basket_response(basket))
 
 
