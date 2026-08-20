@@ -61,6 +61,12 @@ class Product(SoftDeleteModel):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products', verbose_name="Категория")
     tags = models.ManyToManyField(Tag, blank=True, related_name='products', verbose_name="Теги")
 
+    def delete(self, *args, **kwargs):
+        """Мягкое удаление объекта: вместо удаления меняем флаг"""
+        self.is_deleted = True
+        self.save()
+
+
     def __str__(self):
         return self.name
 

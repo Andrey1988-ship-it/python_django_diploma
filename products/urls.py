@@ -11,8 +11,8 @@ urlpatterns = [
     path('banners', BannersView.as_view(), name='banners'),
     path('tags', TagsListView.as_view(), name='tags'),
     path('catalog', CatalogListView.as_view(), name='catalog'),
+    path('catalog/', CatalogListView.as_view(), name='catalog-slash'),
 
-    # КАРТОЧКА ТОВАРА И ОТЗЫВЫ (ИСПРАВЛЕНО ПО СТАРОЙ API)
     # КАРТОЧКА ТОВАРА И ОТЗЫВЫ (ПОДДЕРЖКА ОБЕИХ ВЕРСИЙ ССЫЛОК)
     path('product/<int:id>', ProductDetailView.as_view(), name='product-detail'),
     path('product/<int:id>/', ProductDetailView.as_view(), name='product-detail-slash'),
