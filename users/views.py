@@ -1,90 +1,94 @@
-from django.shortcuts import get_object_or_404
-from django.contrib.auth import login, logout
-from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.parsers import MultiPartParser, FormParser
-
-from .models import Profile
-from .serializers import ProfileSerializer
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
 
 
-class SignInView(APIView):
-    def post(self, request):
-        username = request.query_params.get('username') or request.data.get('username')
-        if username:
+# Вспомогательная функция, чтобы распарсить странный JSON от Megano
+def parse_megano_data(request):
+    data = request.data
+    # Если пришёл словарь с одним ключом, где ключ - это строка JSON
+    if isinstance(data, dict) and len(data) == 1:
+        key = list(data.keys())[0]
+        if key.startswith('{'):
             try:
-                user = User.objects.get(username=username)
-                login(request, user)
-                return Response(status=status.HTTP_200_OK)
-            except User.DoesNotExist:
+                data = json.loads(key)
+                print(f"✅ JSON распарсен: {data}")
+            except json.JSONDecodeError:
                 pass
-        user = User.objects.order_by('id').first()
-        if user:
-            login(request, user)
-            return Response(status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # Дополнительная защита: если данные в сыром теле
+    if not isinstance(data, dict) or not data.get('password'):
+        try:
+            raw_data = json.loads(request.body)
+            if isinstance(raw_data, dict):
+                data = raw_data
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            pass
+    return data
 
 
-class SignUpView(APIView):
-    def post(self, request):
-        name = request.query_params.get('name')
-        username = request.query_params.get('username')
-        password = request.query_params.get('password')
-        if not username or not password:
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        if User.objects.filter(username=username).exists():
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        user = User.objects.create_user(username=username, password=password, first_name=name)
-        login(request, user)
-        return Response(status=status.HTTP_200_OK)
-
-
-class SignOutView(APIView):
-    def post(self, request):
-        logout(request)
-        return Response(status=status.HTTP_200_OK)
-
-
-class ProfileView(APIView):
-    """Редактирование текстовой информации личного кабинета"""
-
+class RegisterView(APIView):
     def get(self, request):
-        if not request.user.is_authenticated:
-            return Response({"error": "Авторизуйтесь"}, status=status.HTTP_401_UNAUTHORIZED)
-        profile, created = Profile.objects.get_or_create(user=request.user)
-        return Response(ProfileSerializer(profile, context={'request': request}).data)
+        return Response({"message": "Используйте метод POST для регистрации"}, status=status.HTTP_200_OK)
 
     def post(self, request):
-        if not request.user.is_authenticated:
-            return Response({"error": "Авторизуйтесь"}, status=status.HTTP_401_UNAUTHORIZED)
-        profile, created = Profile.objects.get_or_create(user=request.user)
-        user = request.user
-        user.first_name = request.data.get('fullName', user.first_name)
-        user.email = request.data.get('email', user.email)
-        user.save()
-        profile.phone = request.data.get('phone', profile.phone)
-        profile.save()
-        return Response(ProfileSerializer(profile, context={'request': request}).data)
+        data = parse_megano_data(request)
+        print(f"🛠 Данные для регистрации: {data}")
+
+        username = data.get('username') or data.get('name') or data.get('email')
+        password = data.get('password')
+        email = data.get('email', '')
+        first_name = data.get('first_name') or data.get('firstName') or ''
+        last_name = data.get('last_name') or data.get('lastName') or ''
+
+        if not password:
+            return Response({"error": "Пароль не указан"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not username and email:
+            username = email
+        elif not username:
+            return Response({"error": "Логин не указан"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "Пользователь уже существует"}, status=status.HTTP_400_BAD_REQUEST)
+
+        User.objects.create_user(
+            username=username,
+            password=password,
+            email=email,
+            first_name=first_name,
+            last_name=last_name
+        )
+        print(f"✅ Пользователь {username} успешно создан!")
+        return Response({"message": "Пользователь успешно зарегистрирован"}, status=status.HTTP_201_CREATED)
 
 
-
-
-class ProfileAvatarView(APIView):
-    parser_classes = [MultiPartParser, FormParser]
+class LoginView(APIView):
+    def get(self, request):
+        return Response({"message": "Используйте метод POST для входа"}, status=status.HTTP_200_OK)
 
     def post(self, request):
-        if not request.user.is_authenticated:
-            return Response({"error": "Авторизуйтесь"}, status=status.HTTP_401_UNAUTHORIZED)
-        profile, created = Profile.objects.get_or_create(user=request.user)
-        avatar_file = request.FILES.get('avatar')
-        if avatar_file:
-            profile.avatar = avatar_file
-            try:
-                profile.full_clean()
-                profile.save()
-            except ValidationError as e:
-                return Response({"errors": e.message_dict}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(ProfileSerializer(profile, context={'request': request}).data)
+        data = parse_megano_data(request)
+        print(f"🛠 Данные для входа: {data}")
+
+        username = data.get('username') or data.get('name') or data.get('email')
+        password = data.get('password')
+
+        # Проверяем пользователя и создаем сессию
+        user = authenticate(request=request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)  # ВАЖНО: создаем сессию, чтобы шапка обновилась
+            print(f"✅ Вход выполнен для: {username}")
+            return Response({"message": "Вход выполнен"}, status=status.HTTP_200_OK)
+
+        print(f"❌ Ошибка входа: пользователь {username} не найден или пароль неверный")
+        return Response({"error": "Неверные данные"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutView(APIView):
+    def post(self, request):
+        logout(request)  # Удаляем сессию
+        return Response({"message": "Вы вышли из системы"}, status=status.HTTP_200_OK)
