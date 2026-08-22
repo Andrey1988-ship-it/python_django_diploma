@@ -29,6 +29,7 @@ class LimitedProductsView(APIView):
 
 class BannersView(APIView):
     def get(self, request):
+        print(f"⚡️ БЭК ПОЛУЧИЛ ЗАПРОС: {request.path}")
         products = Product.objects.filter(is_deleted=False).order_by('id')[:3]
         serializer = ProductSerializer(products, many=True, context={'request': request})
         return Response(serializer.data)
@@ -126,6 +127,22 @@ class CatalogListView(APIView):
         serializer = ProductSerializer(final_queryset, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
+class SalesListView(APIView):
+    def get(self, request):
+        # Берем товары. Если у вас есть поле "old_price" или "discount" (скидка),
+        # замените queryset на: Product.objects.filter(old_price__isnull=False, is_deleted=False)
+        # Для простоты возьмем все товары, чтобы не было 404:
+        queryset = Product.objects.filter(is_deleted=False)
+
+        # Используем вашу пагинацию (она уже есть в файле)
+        paginator = CatalogPagination()
+        paginated_queryset = paginator.paginate_queryset(queryset, request, view=self)
+
+        # Если пагинатор вернул пустоту, берем весь кверисет
+        final_queryset = paginated_queryset if paginated_queryset is not None and len(paginated_queryset) > 0 else list(queryset)
+
+        serializer = ProductSerializer(final_queryset, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
 
 
