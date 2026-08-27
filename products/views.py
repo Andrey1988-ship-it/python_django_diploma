@@ -102,10 +102,15 @@ class CatalogListView(APIView):
         if free_delivery == 'true':
             queryset = queryset.filter(free_delivery=True)
 
-        # 6. Фильтр по категории (применяется, только если передан реальный ID категории числом)
-        category_id = request.query_params.get('category')
-        if category_id and str(category_id).isdigit():
-            queryset = queryset.filter(category_id=int(category_id))
+        # 6.2 Фильтр по тегам
+        tag_list = request.query_params.getlist('tags[]') or request.query_params.getlist('tags')
+        if tag_list:
+            try:
+                tag_ids = [int(t) for t in tag_list if str(t).isdigit()]
+                if tag_ids:
+                    queryset = queryset.filter(tags__id__in=tag_ids).distinct()
+            except ValueError:
+                pass
 
         # 7. Сортировка полей
         sort_field = request.query_params.get('sort', 'date')

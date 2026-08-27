@@ -92,3 +92,38 @@ class LogoutView(APIView):
     def post(self, request):
         logout(request)  # Удаляем сессию
         return Response({"message": "Вы вышли из системы"}, status=status.HTTP_200_OK)
+
+from rest_framework import serializers
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+
+class ProfileView(APIView):
+    def get(self, request):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response({"error": "Авторизуйтесь"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(UserProfileSerializer(user).data)
+
+    def post(self, request):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response({"error": "Авторизуйтесь"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # ФИКС: парсим JSON-строку от Megano
+        data = request.data
+        if isinstance(data, dict) and len(data) == 1:
+            key = list(data.keys())[0]
+            if key.startswith('{'):
+                try:
+                    data = json.loads(key)
+                except:
+                    pass
+
+        user.first_name = data.get('first_name', user.first_name)
+        user.last_name = data.get('last_name', user.last_name)
+        user.email = data.get('email', user.email)
+        user.save()
+        return Response({"message": "Профиль обновлен"})
