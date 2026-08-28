@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: megano-redis
+    ports:
+      - "6339:6379"
+    restart: always

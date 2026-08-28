@@ -1,0 +1,538 @@
+[
+{
+    "model": "api.tag",
+    "pk": 1,
+    "fields": {
+        "name": "мозг"
+    }
+},
+{
+    "model": "api.tag",
+    "pk": 2,
+    "fields": {
+        "name": "природа"
+    }
+},
+{
+    "model": "api.category",
+    "pk": 1,
+    "fields": {
+        "is_deleted": false,
+        "title": "Книги",
+        "parent": null,
+        "image_src": "categories/book1.webp",
+        "image_alt": ""
+    }
+},
+{
+    "model": "api.category",
+    "pk": 2,
+    "fields": {
+        "is_deleted": false,
+        "title": "Брелки",
+        "parent": null,
+        "image_src": "categories/IMG_20260601_225102_670.jpg",
+        "image_alt": ""
+    }
+},
+{
+    "model": "api.product",
+    "pk": 1,
+    "fields": {
+        "is_deleted": false,
+        "name": "Музыка",
+        "description": "книга класс",
+        "price": "12.00",
+        "count": 4,
+        "sort_index": 2,
+        "sales_count": 3,
+        "limited_edition": true,
+        "free_delivery": true,
+        "category": 1,
+        "tags": []
+    }
+},
+{
+    "model": "api.product",
+    "pk": 2,
+    "fields": {
+        "is_deleted": false,
+        "name": "Мозг",
+        "description": "класс книга",
+        "price": "2.00",
+        "count": 14,
+        "sort_index": 2,
+        "sales_count": 245,
+        "limited_edition": true,
+        "free_delivery": true,
+        "category": 1,
+        "tags": [
+            1
+        ]
+    }
+},
+{
+    "model": "api.product",
+    "pk": 3,
+    "fields": {
+        "is_deleted": false,
+        "name": "Карнеги",
+        "description": "очень хорошая",
+        "price": "2.18",
+        "count": 14,
+        "sort_index": 1,
+        "sales_count": 1,
+        "limited_edition": false,
+        "free_delivery": true,
+        "category": 1,
+        "tags": [
+            1
+        ]
+    }
+},
+{
+    "model": "api.product",
+    "pk": 4,
+    "fields": {
+        "is_deleted": false,
+        "name": "Ракушки",
+        "description": "познавательно",
+        "price": "4.00",
+        "count": 0,
+        "sort_index": 1,
+        "sales_count": 0,
+        "limited_edition": false,
+        "free_delivery": false,
+        "category": 1,
+        "tags": [
+            1
+        ]
+    }
+},
+{
+    "model": "api.product",
+    "pk": 5,
+    "fields": {
+        "is_deleted": false,
+        "name": "Фром",
+        "description": "супер",
+        "price": "3.00",
+        "count": 2,
+        "sort_index": 5,
+        "sales_count": 1,
+        "limited_edition": true,
+        "free_delivery": true,
+        "category": 1,
+        "tags": []
+    }
+},
+{
+    "model": "api.product",
+    "pk": 6,
+    "fields": {
+        "is_deleted": false,
+        "name": "Pink dragon",
+        "description": "Pink dragon",
+        "price": "2.00",
+        "count": 16,
+        "sort_index": 0,
+        "sales_count": 1,
+        "limited_edition": true,
+        "free_delivery": true,
+        "category": 2,
+        "tags": [
+            2
+        ]
+    }
+},
+{
+    "model": "api.product",
+    "pk": 7,
+    "fields": {
+        "is_deleted": false,
+        "name": "White heart",
+        "description": "nice keychain",
+        "price": "2.00",
+        "count": 14,
+        "sort_index": 0,
+        "sales_count": 0,
+        "limited_edition": false,
+        "free_delivery": false,
+        "category": 2,
+        "tags": []
+    }
+},
+{
+    "model": "api.product",
+    "pk": 8,
+    "fields": {
+        "is_deleted": false,
+        "name": "violet keychyain",
+        "description": "wonderful",
+        "price": "2.00",
+        "count": 0,
+        "sort_index": 1,
+        "sales_count": 2,
+        "limited_edition": true,
+        "free_delivery": true,
+        "category": 2,
+        "tags": []
+    }
+},
+{
+    "model": "api.review",
+    "pk": 1,
+    "fields": {
+        "product": 3,
+        "author": 1,
+        "text": "Норм книжка",
+        "rate": 4,
+        "date_created": "2026-07-31T15:47:00.433Z"
+    }
+},
+{
+    "model": "api.profile",
+    "pk": 1,
+    "fields": {
+        "is_deleted": false,
+        "user": 1,
+        "phone": "+375293167208",
+        "avatar": "avatars/okun-1_yoARXQ8.jpg"
+    }
+},
+{
+    "model": "api.order",
+    "pk": 1,
+    "fields": {
+        "is_deleted": false,
+        "user": 1,
+        "date_created": "2026-07-30T11:57:50.597Z",
+        "delivery_type": "Обычная",
+        "payment_type": "Онлайн картой",
+        "total_cost": "36.00",
+        "city": null,
+        "address": null,
+        "comment": null,
+        "status": "Ожидает оплаты",
+        "payment_error": null
+    }
+},
+{
+    "model": "api.order",
+    "pk": 2,
+    "fields": {
+        "is_deleted": false,
+        "user": 1,
+        "date_created": "2026-07-30T12:01:03.092Z",
+        "delivery_type": "Обычная",
+        "payment_type": "online",
+        "total_cost": "36.00",
+        "city": "",
+        "address": "",
+        "comment": null,
+        "status": "Ошибка оплаты",
+        "payment_error": "Номер нечётный или заканчивается на ноль (Имитация ошибки платежной системы)"
+    }
+},
+{
+    "model": "api.order",
+    "pk": 3,
+    "fields": {
+        "is_deleted": false,
+        "user": 1,
+        "date_created": "2026-07-30T16:34:30.285Z",
+        "delivery_type": "express",
+        "payment_type": "online",
+        "total_cost": "502.18",
+        "city": "в",
+        "address": "в",
+        "comment": null,
+        "status": "Ожидает оплаты",
+        "payment_error": null
+    }
+},
+{
+    "model": "api.order",
+    "pk": 4,
+    "fields": {
+        "is_deleted": false,
+        "user": 1,
+        "date_created": "2026-07-30T17:43:51.864Z",
+        "delivery_type": "express",
+        "payment_type": "online",
+        "total_cost": "504.36",
+        "city": "у",
+        "address": "у",
+        "comment": null,
+        "status": "Ожидает оплаты",
+        "payment_error": null
+    }
+},
+{
+    "model": "api.order",
+    "pk": 5,
+    "fields": {
+        "is_deleted": false,
+        "user": 1,
+        "date_created": "2026-07-31T08:38:53.016Z",
+        "delivery_type": "Обычная",
+        "payment_type": "Онлайн картой",
+        "total_cost": "2.18",
+        "city": null,
+        "address": null,
+        "comment": null,
+        "status": "Ожидает оплаты",
+        "payment_error": null
+    }
+},
+{
+    "model": "api.order",
+    "pk": 6,
+    "fields": {
+        "is_deleted": false,
+        "user": 1,
+        "date_created": "2026-07-31T09:28:32.696Z",
+        "delivery_type": "Обычная",
+        "payment_type": "Онлайн картой",
+        "total_cost": "2.18",
+        "city": null,
+        "address": null,
+        "comment": null,
+        "status": "Ожидает оплаты",
+        "payment_error": null
+    }
+},
+{
+    "model": "api.order",
+    "pk": 7,
+    "fields": {
+        "is_deleted": false,
+        "user": 1,
+        "date_created": "2026-07-31T09:37:13.543Z",
+        "delivery_type": "express",
+        "payment_type": "online",
+        "total_cost": "502.18",
+        "city": "1",
+        "address": "1",
+        "comment": null,
+        "status": "Оплачено",
+        "payment_error": null
+    }
+},
+{
+    "model": "api.order",
+    "pk": 8,
+    "fields": {
+        "is_deleted": false,
+        "user": 1,
+        "date_created": "2026-07-31T16:26:52.919Z",
+        "delivery_type": "Обычная",
+        "payment_type": "Онлайн картой",
+        "total_cost": "40.18",
+        "city": null,
+        "address": null,
+        "comment": null,
+        "status": "Ожидает оплаты",
+        "payment_error": null
+    }
+},
+{
+    "model": "api.order",
+    "pk": 9,
+    "fields": {
+        "is_deleted": false,
+        "user": 1,
+        "date_created": "2026-07-31T16:45:08.547Z",
+        "delivery_type": "Обычная",
+        "payment_type": "Онлайн картой",
+        "total_cost": "12.00",
+        "city": null,
+        "address": null,
+        "comment": null,
+        "status": "Ожидает оплаты",
+        "payment_error": null
+    }
+},
+{
+    "model": "api.orderitem",
+    "pk": 1,
+    "fields": {
+        "order": 1,
+        "product": 1,
+        "price": "12.00",
+        "count": 3
+    }
+},
+{
+    "model": "api.orderitem",
+    "pk": 2,
+    "fields": {
+        "order": 2,
+        "product": 1,
+        "price": "12.00",
+        "count": 3
+    }
+},
+{
+    "model": "api.orderitem",
+    "pk": 3,
+    "fields": {
+        "order": 3,
+        "product": 3,
+        "price": "2.18",
+        "count": 1
+    }
+},
+{
+    "model": "api.orderitem",
+    "pk": 4,
+    "fields": {
+        "order": 4,
+        "product": 3,
+        "price": "2.18",
+        "count": 2
+    }
+},
+{
+    "model": "api.orderitem",
+    "pk": 5,
+    "fields": {
+        "order": 5,
+        "product": 3,
+        "price": "2.18",
+        "count": 1
+    }
+},
+{
+    "model": "api.orderitem",
+    "pk": 6,
+    "fields": {
+        "order": 6,
+        "product": 3,
+        "price": "2.18",
+        "count": 1
+    }
+},
+{
+    "model": "api.orderitem",
+    "pk": 7,
+    "fields": {
+        "order": 7,
+        "product": 3,
+        "price": "2.18",
+        "count": 1
+    }
+},
+{
+    "model": "api.orderitem",
+    "pk": 8,
+    "fields": {
+        "order": 8,
+        "product": 3,
+        "price": "2.18",
+        "count": 1
+    }
+},
+{
+    "model": "api.orderitem",
+    "pk": 9,
+    "fields": {
+        "order": 8,
+        "product": 2,
+        "price": "2.00",
+        "count": 1
+    }
+},
+{
+    "model": "api.orderitem",
+    "pk": 10,
+    "fields": {
+        "order": 8,
+        "product": 1,
+        "price": "12.00",
+        "count": 3
+    }
+},
+{
+    "model": "api.orderitem",
+    "pk": 11,
+    "fields": {
+        "order": 9,
+        "product": 1,
+        "price": "12.00",
+        "count": 1
+    }
+},
+{
+    "model": "api.productimage",
+    "pk": 1,
+    "fields": {
+        "product": 1,
+        "image": "products/book2_yl7Tw0x.webp",
+        "alt": ""
+    }
+},
+{
+    "model": "api.productimage",
+    "pk": 2,
+    "fields": {
+        "product": 2,
+        "image": "products/Мозг.webp",
+        "alt": ""
+    }
+},
+{
+    "model": "api.productimage",
+    "pk": 3,
+    "fields": {
+        "product": 3,
+        "image": "products/Карнеги.webp",
+        "alt": ""
+    }
+},
+{
+    "model": "api.productimage",
+    "pk": 4,
+    "fields": {
+        "product": 4,
+        "image": "products/Ракушки.webp",
+        "alt": ""
+    }
+},
+{
+    "model": "api.productimage",
+    "pk": 5,
+    "fields": {
+        "product": 5,
+        "image": "products/фром.webp",
+        "alt": ""
+    }
+},
+{
+    "model": "api.productimage",
+    "pk": 6,
+    "fields": {
+        "product": 6,
+        "image": "products/IMG_20260601_224719_893.jpg",
+        "alt": ""
+    }
+},
+{
+    "model": "api.productimage",
+    "pk": 7,
+    "fields": {
+        "product": 7,
+        "image": "products/IMG_20260601_224719_887.jpg",
+        "alt": ""
+    }
+},
+{
+    "model": "api.productimage",
+    "pk": 8,
+    "fields": {
+        "product": 8,
+        "image": "products/IMG_20260601_224719_907.jpg",
+        "alt": ""
+    }
+}
+]
