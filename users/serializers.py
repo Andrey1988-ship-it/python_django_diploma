@@ -1,23 +1,22 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile
 
-class ProfileSerializer(serializers.ModelSerializer):
-    # Явно связываем поля с моделью User, так как фронтенд ждет fullName и email в одном объекте
-    fullName = serializers.CharField(source='user.first_name', read_only=True)
-    email = serializers.EmailField(source='user.email', read_only=True)
+class UserProfileSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(source='profile.phone', required=False, allow_blank=True)
     avatar = serializers.SerializerMethodField()
+    fullName = serializers.SerializerMethodField()
 
     class Meta:
-        model = Profile
-        fields = ['fullName', 'email', 'phone', 'avatar']
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'fullName', 'phone', 'avatar']
 
     def get_avatar(self, obj):
         request = self.context.get('request')
-        if obj.avatar:
-            url = request.build_absolute_uri(obj.avatar.url) if request else obj.avatar.url
-            return {
-                "src": url,
-                "alt": "avatar"
-            }
-        return {"src": "https://placeholder.com", "alt": "default avatar"}
+        if obj.profile.avatar:
+            url = obj.profile.avatar.url
+            # Возвращаем объект, как ожидает фронт
+            return {"src": request.build_absolute_uri(url) if request else url, "alt": "Аватар"}
+        return {"src": "", "alt": "Аватар"}
+
+    def get_fullName(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip()
